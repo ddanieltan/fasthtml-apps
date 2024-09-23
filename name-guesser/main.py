@@ -62,11 +62,18 @@ og_meta_tags = (
     ),
 )
 
+plausible = Script(
+    defer="",
+    data_domain="name-guesser-ddanieltan.up.railway.app",
+    src="https://plausible-analytics-ce-production-b033.up.railway.app/js/script.js",
+)
+
 hdrs = (
     picolink,
     Link(rel="stylesheet", href="https://unpkg.com/blocks.css/dist/blocks.min.css"),
     css,
     og_meta_tags,
+    plausible,
 )
 app, rt = fast_app(live=True, hdrs=hdrs, htmlkw={"data-theme": "light"})
 
