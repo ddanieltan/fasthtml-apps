@@ -46,7 +46,7 @@ og_meta_tags = (
     Meta(property="og:type", content="website"),
     Meta(
         property="og:image",
-        content="The url where you’re hosting the image you want to use goes here (For instance: http://yourimagehost.com/yourimage.jpg)",
+        content="https://imgur.com/a/047nVOO",
     ),
     Meta(
         property="og:image:width",
