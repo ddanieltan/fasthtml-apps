@@ -169,23 +169,29 @@ def post(first_name: str, last_name: str):
             style={"display": "flex", "justify-content": "center"},
         ), get_input_group(hx_swap_oob="true")
 
-    nationality_resp = requests.get(
-        f"https://api.nationalize.io/?name={last_name}"
-    ).json()
+    nationality_resp = requests.get(f"https://api.nationalize.io/?name={last_name}")
+    gender_resp = requests.get(f"https://api.genderize.io?name={first_name}")
+
+    if (nationality_resp.status_code != 200) or (gender_resp.status_code != 200):
+        return Div(
+            "🙅‍♂️ This app has hit the API limit for today. Please try again tomorrow.",
+            cls="fixed block",
+            style={"display": "flex", "justify-content": "center"},
+        ), get_input_group(hx_swap_oob="true")
+
     nationality_data = [
         Nationality(c["country_id"], c["probability"])
-        for c in nationality_resp["country"]
+        for c in nationality_resp.json()["country"]
     ]
     nationality_table = build_nationality_table(nationality_data)
 
-    gender_resp = requests.get(f"https://api.genderize.io?name={first_name}").json()
     gender_data = []
-    if gender_resp["gender"] == "male":
-        gender_data.append(Gender("male", gender_resp["probability"]))
-        gender_data.append(Gender("female", 1.0 - gender_resp["probability"]))
-    elif gender_resp["gender"] == "female":
-        gender_data.append(Gender("female", gender_resp["probability"]))
-        gender_data.append(Gender("male", 1.0 - gender_resp["probability"]))
+    if gender_resp.json()["gender"] == "male":
+        gender_data.append(Gender("male", gender_resp.json()["probability"]))
+        gender_data.append(Gender("female", 1.0 - gender_resp.json()["probability"]))
+    elif gender_resp.json()["gender"] == "female":
+        gender_data.append(Gender("female", gender_resp.json()["probability"]))
+        gender_data.append(Gender("male", 1.0 - gender_resp.json()["probability"]))
     gender_table = build_gender_table(gender_data)
 
     headline = (
