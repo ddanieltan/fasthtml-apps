@@ -48,7 +48,7 @@ og_meta_tags = (
     Meta(
         property="og:image",
         content="https://imgur.com/a/047nVOO",
-    ),
+    ),  # TODO
     Meta(
         property="og:image:width",
         content="400",
