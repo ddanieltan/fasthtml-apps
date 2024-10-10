@@ -17,6 +17,7 @@ body {
     --block-accent-color: #3cdd8c;
     --block-shadow-color: #444;
     height: 100%;
+    font-family: "Atkinson Hyperlegible";
 }
 
 footer {
@@ -67,6 +68,14 @@ plausible = Script(
     data_domain="name-guesser-ddanieltan.up.railway.app",
     src="https://plausible-analytics-ce-production-b033.up.railway.app/js/script.js",
 )
+fonts = [
+    Link(rel="preconnect", href="https://fonts.googleapis.com"),
+    Link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
+    Link(
+        href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap",
+        rel="stylesheet",
+    ),
+]
 
 hdrs = (
     picolink,
@@ -74,6 +83,9 @@ hdrs = (
     css,
     og_meta_tags,
     plausible,
+    *fonts,
+    css,
+)
 )
 app, rt = fast_app(live=True, hdrs=hdrs, htmlkw={"data-theme": "light"})
 
