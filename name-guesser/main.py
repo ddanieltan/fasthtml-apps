@@ -63,11 +63,6 @@ og_meta_tags = (
     ),
 )
 
-plausible = Script(
-    defer="",
-    data_domain="name-guesser-ddanieltan.up.railway.app",
-    src="https://plausible-analytics-ce-production-b033.up.railway.app/js/script.js",
-)
 fonts = [
     Link(rel="preconnect", href="https://fonts.googleapis.com"),
     Link(rel="preconnect", href="https://fonts.gstatic.com", crossorigin=""),
@@ -80,14 +75,15 @@ fonts = [
 hdrs = (
     picolink,
     Link(rel="stylesheet", href="https://unpkg.com/blocks.css/dist/blocks.min.css"),
-    css,
     og_meta_tags,
-    plausible,
     *fonts,
     css,
 )
+app, rt = fast_app(
+    live=True,
+    hdrs=hdrs,
+    htmlkw={"data-theme": "light"},
 )
-app, rt = fast_app(live=True, hdrs=hdrs, htmlkw={"data-theme": "light"})
 
 
 @dataclass
@@ -295,6 +291,11 @@ def build_gender_table(gender_data: list[Gender]) -> Table:
         Tbody(*rows),
         style={"table-layout": "fixed", "width": "100%"},
     )
+
+
+@rt("/test")
+def get():
+    return ""
 
 
 serve()
