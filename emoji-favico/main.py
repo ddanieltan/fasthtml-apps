@@ -1,62 +1,19 @@
-# %%
-import requests
+import emoji
 from fasthtml.common import *
 
 css = Style("""
 html {
     background-color: #f8f5f5;
 }
-
 body {
     --block-text-color: #222;
     --block-background-color: #fff;
     --block-accent-color: #3cdd8c;
     --block-shadow-color: #444;
     height: 100%;
+    font-family: "Atkinson Hyperlegible", sans-serif;
 }
-
-footer {
-    position:fixed;
-    bottom:0;
-    left:0;
-    height: 40px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-footer > p {
-    text-color: #f1f1f1;
-    font-size: 14px
-}
-
 """)
-
-og_meta_tags = (
-    Meta(property="og:title", content="Name Guesser"),
-    Meta(
-        property="og:url",
-        content="https://name-guesser-ddanieltan.up.railway.app/",
-    ),
-    Meta(property="og:type", content="website"),
-    Meta(
-        property="og:image",
-        content="https://imgur.com/a/047nVOO",
-    ),
-    Meta(
-        property="og:image:width",
-        content="400",
-    ),
-    Meta(
-        property="og:image:height",
-        content="300",
-    ),
-    Meta(
-        property="og:description",
-        content="Can we guess your nationality and gender from your name?",
-    ),
-)
 
 fonts = [
     Link(rel="preconnect", href="https://fonts.googleapis.com"),
@@ -68,95 +25,93 @@ fonts = [
 ]
 
 hdrs = (
-    # picolink,
-    # Link(rel="stylesheet", href="https://unpkg.com/blocks.css/dist/blocks.min.css"),
-    # Link(
-    #     rel="icon",
-    #     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>😃</text></svg>",
-    # ),
     HighlightJS(langs=["python", "javascript", "html", "css"]),
-    # css,
-    # og_meta_tags,
+    Link(rel="stylesheet", href="https://unpkg.com/blocks.css/dist/blocks.min.css"),
+    Link(
+        rel="icon",
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>😃</text></svg>",
+    ),
+    *fonts,
+    css,
+    picolink,
 )
-hdrs = (HighlightJS(langs=["python", "javascript", "html", "css"]),)
-app, rt = fast_app(live=True, hdrs=hdrs)
-
-
-code_example = """
-import datetime
-import time
-
-for i in range(10):
-    print(f"{datetime.datetime.now()}")
-    time.sleep(1)
-"""
+app, rt = fast_app(live=True, hdrs=hdrs, htmlkw={"data-theme": "light"})
 
 
 @rt("/")
-def get(req):
-    return Titled(
-        "Markdown rendering example",
-        Div(
-            # The code example needs to be surrounded by
-            # Pre & Code elements
-            Pre(Code(code_example))
+def get():
+    return Title("Emoji Favicons"), Container(
+        Hgroup(
+            generate_title(),
+            P("The fastest way to get a Favicon for your FastHTML App"),
+        ),
+        P(
+            "Need a favicon for your ",
+            A("FastHTML app", href="https://fastht.ml/"),
+            "? 🤕 Skip the headache of having to source and host multiple image files and formats. Convert any emoji into an instant favicon by adding this one-liner in your header!",
+        ),
+        P("Inspired by: ", A("emojicon.dev", href="https://emojicon.dev")),
+        Textarea(
+            id="textarea_input",
+            hx_post="/generate",
+            hx_trigger="input delay:500ms",
+            hx_target="#results",
+            rows=1,
+            placeholder="Enter an Emoji",
+        ),
+        generate_results(),
+        Footer(
+            style={
+                "position": "fixed",
+                "bottom": 0,
+                "left": 0,
+                "height": "2rem",
+                "width": "100%",
+                "display": "flex",
+                "justify-content": "center",
+                "aligh-items": "center",
+            }
+        )(
+            P(style={"text-color": "#f1f1f1", "font-size": "16px"})(
+                "Built with ",
+                A("FastHTML", href="https://www.fastht.ml/"),
+                " by ",
+                A("@ddanieltan", href="https://www.ddanieltan.com"),
+            ),
         ),
     )
 
 
-# # %%
-# @rt("/")
-# def get():
-#     return Title("Emoji Favico"), Container(
-#         Hgroup(
-#             H1("Emoji Favico"),
-#             P("Emoji as"),
-#         ),
-#         P(
-#             "The ",
-#             A("Nationalize API", href="https://nationalize.io/documentation"),
-#             " and ",
-#             A("Genderize API", href="https://genderize.io/documentation"),
-#             " makes predictions on your nationality and gender based on your name. Let's see how accurate it is.",
-#         ),
-#         Form(
-#             Button(
-#                 "Guess!",
-#                 cls="round block",
-#                 hx_indicator="#spinner",
-#                 style={"width": "100px"},
-#             ),
-#             Span(
-#                 "Guessing...",
-#                 id="spinner",
-#                 cls="htmx-indicator",
-#                 aria_busy="true",
-#             ),
-#             id="form_name",
-#             hx_post="/guess",
-#             hx_target="#result",
-#             style={
-#                 "display": "flex",
-#                 "flex-direction": "column",
-#                 "align-items": "center",
-#                 "max-width": "800px",
-#                 "margin": "0 auto",
-#             },
-#         ),
-#         Div(Pre(Code(code_example))),
-#         Div(
-#             id="result",
-#             cls="grid",
-#         ),
-#         Footer(
-#             P(
-#                 "Built with ",
-#                 A("FastHTML", href="https://www.fastht.ml/"),
-#                 " by ",
-#                 A("@ddanieltan", href="https://www.ddanieltan.com"),
-#             ),
-#         ),
-#     )
-#
-#
+@rt("/generate")
+def post(textarea_input: str):
+    if len(textarea_input) > 1 or not emoji.is_emoji(textarea_input):
+        return Div(id="results")(
+            "Please input a single emoji as defined by the ",
+            A(
+                "Unicode Consortium",
+                href="https://unicode.org/emoji/charts/full-emoji-list.html",
+            ),
+        ), generate_title(hx_swap_oob="true")
+    return generate_results(textarea_input), generate_title(
+        textarea_input, hx_swap_oob="true"
+    )
+
+
+def generate_title(input_emoji: str = "🚀", **kwargs) -> H1:
+    return H1(f"{input_emoji} Emoji Favicons", id="title", **kwargs)
+
+
+def generate_results(input_emoji: str = "🚀") -> Div:
+    block = f"""Link(rel="icon",href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>{input_emoji}</text></svg>")"""
+
+    results = Div(id="results")(
+        H4("Copy this 1 liner..."),
+        Pre(style={"white-space": "pre-wrap"})(
+            Code(id="result_code", cls="language-python")(block)
+        ),
+    )
+
+    return results
+
+
 serve()
