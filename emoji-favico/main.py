@@ -133,14 +133,15 @@ serve()
 """
 
     results = Div(id="results")(
-        H4("Simply copy this 1 liner..."),
+        H5("Simply copy this 1 liner..."),
         Pre(style={"white-space": "pre-wrap"})(
             Code(id="result_code", cls="language-python")(block)
         ),
-        H4("...into your FastHTML header", style={"text-align": "right"}),
+        H5("into your FastHTML header..."),
         Pre(style={"white-space": "pre-wrap"})(
             Code(id="result_code", cls="language-python")(full)
         ),
+        H5("And your Favicon is now live! (Take a look at this tab ☝️)"),
     )
 
     return results
