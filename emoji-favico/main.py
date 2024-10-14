@@ -8,7 +8,7 @@ html {
 body {
     --block-text-color: #222;
     --block-background-color: #fff;
-    --block-accent-color: #3cdd8c;
+    --block-accent-color: #ff7081;
     --block-shadow-color: #444;
     height: 100%;
     font-family: "Atkinson Hyperlegible", sans-serif;
@@ -27,15 +27,20 @@ fonts = [
 hdrs = (
     HighlightJS(langs=["python", "javascript", "html", "css"]),
     Link(rel="stylesheet", href="https://unpkg.com/blocks.css/dist/blocks.min.css"),
-    Link(
-        rel="icon",
-        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>😃</text></svg>",
-    ),
     *fonts,
     css,
-    picolink,
+    Script(src="https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js"),
+    Link(
+        rel="icon",
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🚀</text></svg>",
+    ),
 )
-app, rt = fast_app(live=True, hdrs=hdrs, htmlkw={"data-theme": "light"})
+app, rt = fast_app(
+    live=True,
+    hdrs=hdrs,
+    htmlkw={"data-theme": "light"},
+    bodykw={"hx-ext": "head-support"},
+)
 
 
 @rt("/")
@@ -48,16 +53,24 @@ def get():
         P(
             "Need a favicon for your ",
             A("FastHTML app", href="https://fastht.ml/"),
-            "? 🤕 Skip the headache of having to source and host multiple image files and formats. Convert any emoji into an instant favicon by adding this one-liner in your header!",
+            "? 🤕 Skip the headache of having to source and host multiple image files and formats and instead convert any emoji into an instant favicon!",
         ),
-        P("Inspired by: ", A("emojicon.dev", href="https://emojicon.dev")),
+        P(
+            "Inspired by: ",
+            A("emojicon.dev", href="https://emojicon.dev"),
+            " and ",
+            A(
+                "this HN discussion",
+                href="https://news.ycombinator.com/item?id=41783340",
+            ),
+        ),
         Textarea(
-            id="textarea_input",
+            id="input_emoji",
             hx_post="/generate",
             hx_trigger="input delay:500ms",
             hx_target="#results",
             rows=1,
-            placeholder="Enter an Emoji",
+            placeholder="Enter an Emoji e.g. 🚀",
         ),
         generate_results(),
         Footer(
@@ -83,17 +96,23 @@ def get():
 
 
 @rt("/generate")
-def post(textarea_input: str):
-    if len(textarea_input) > 1 or not emoji.is_emoji(textarea_input):
-        return Div(id="results")(
-            "Please input a single emoji as defined by the ",
-            A(
-                "Unicode Consortium",
-                href="https://unicode.org/emoji/charts/full-emoji-list.html",
+def post(input_emoji: str):
+    if len(input_emoji) > 1 or not emoji.is_emoji(input_emoji):
+        return (
+            Div(id="results", cls="accent fixed block")(
+                "❌ Please input a single emoji as defined by the ",
+                A(
+                    "Unicode Consortium",
+                    href="https://unicode.org/emoji/charts/full-emoji-list.html",
+                ),
             ),
-        ), generate_title(hx_swap_oob="true")
-    return generate_results(textarea_input), generate_title(
-        textarea_input, hx_swap_oob="true"
+            generate_title(hx_swap_oob="true"),
+            generate_header(),
+        )
+    return (
+        generate_results(input_emoji),
+        generate_title(input_emoji, hx_swap_oob="true"),
+        generate_header(input_emoji),
     )
 
 
@@ -104,14 +123,40 @@ def generate_title(input_emoji: str = "🚀", **kwargs) -> H1:
 def generate_results(input_emoji: str = "🚀") -> Div:
     block = f"""Link(rel="icon",href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>{input_emoji}</text></svg>")"""
 
+    full = f"""from fasthtml.commons import *
+
+hdrs = ({block})
+
+app, rt = fast_app(hdrs = hdrs)
+
+serve()
+"""
+
     results = Div(id="results")(
-        H4("Copy this 1 liner..."),
+        H4("Simply copy this 1 liner..."),
         Pre(style={"white-space": "pre-wrap"})(
             Code(id="result_code", cls="language-python")(block)
+        ),
+        H4("...into your FastHTML header", style={"text-align": "right"}),
+        Pre(style={"white-space": "pre-wrap"})(
+            Code(id="result_code", cls="language-python")(full)
         ),
     )
 
     return results
+
+
+def generate_header(input_emoji: str = "🚀") -> Head:
+    return Head(
+        *HighlightJS(langs=["python", "javascript", "html", "css"]),
+        Link(rel="stylesheet", href="https://unpkg.com/blocks.css/dist/blocks.min.css"),
+        *fonts,
+        css,
+        Link(
+            rel="icon",
+            href=f"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>{input_emoji}</text></svg>",
+        ),
+    )
 
 
 serve()
