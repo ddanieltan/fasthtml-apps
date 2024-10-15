@@ -24,6 +24,31 @@ fonts = [
     ),
 ]
 
+og_meta_tags = (
+    Meta(property="og:title", content="Emoji Favicon"),
+    Meta(
+        property="og:url",
+        content="https://emoji-favico-ddanieltan.up.railway.app/",
+    ),
+    Meta(property="og:type", content="website"),
+    Meta(
+        property="og:image",
+        content="https://name-guesser-ddanieltan.up.railway.app/social.png",
+    ),
+    Meta(
+        property="og:image:width",
+        content="400",
+    ),
+    Meta(
+        property="og:image:height",
+        content="300",
+    ),
+    Meta(
+        property="og:description",
+        content="The fastest way to get a Favicon for your FastHTML App",
+    ),
+)
+
 hdrs = (
     HighlightJS(langs=["python", "javascript", "html", "css"]),
     Link(rel="stylesheet", href="https://unpkg.com/blocks.css/dist/blocks.min.css"),
